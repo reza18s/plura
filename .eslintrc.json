@@ -5,7 +5,14 @@
     "es2021": true,
     "node": true
   },
-  "extends": ["plugin:tailwindcss/recommended", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "next/core-web-vitals",
+    "standard",
+    "plugin:react/recommended",
+    "plugin:tailwindcss/recommended",
+    "prettier"
+  ],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -19,7 +26,6 @@
     "no-console": "warn",
     // Best practices
     "dot-notation": "error",
-    "no-else-return": "error",
     "no-floating-decimal": "error",
     "no-sequences": "error",
     // Stylistic
@@ -31,7 +37,7 @@
     "one-var-declaration-per-line": "error",
     "quotes": [
       "error",
-      "single",
+      "double",
       {
         "allowTemplateLiterals": false,
         "avoidEscape": true
@@ -49,6 +55,7 @@
         "ignoreDeclarationSort": true
       }
     ],
+    "tailwindcss/no-contradicting-classname": "off",
     "no-unused-expressions": "off",
     "no-prototype-builtins": "off",
     // REACT
@@ -69,13 +76,9 @@
         "ignoreCase": true
       }
     ],
+    // "no-undef": "off",
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": 0,
-    // Prettier
-    // eslint looks for the prettier config at the top level of the package/app
-    // but the config lives in the `config/` directory. Passing the config here
-    // to get around this.
-    "prettier/prettier": ["error", "prettierConfig"]
+    "react-hooks/exhaustive-deps": 0
   },
   "settings": {
     "react": {
