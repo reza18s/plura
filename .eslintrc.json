@@ -28,6 +28,7 @@
     "dot-notation": "error",
     "no-floating-decimal": "error",
     "no-sequences": "error",
+    "no-unused-vars": "warn",
     // Stylistic
     "array-bracket-spacing": "error",
     "computed-property-spacing": ["error", "never"],
