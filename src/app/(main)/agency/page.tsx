@@ -9,12 +9,19 @@ export default async function page({
 }: {
   searchParams: { plan: Plan; state: string; code: string };
 }) {
+  const authUser = await currentUser();
   const agencyId = await verifyAndAcceptInvitation();
-  const user = await getAuthUserDetails();
+  const userData = await getAuthUserDetails();
   if (agencyId) {
-    if (user?.role === "SUBACCOUNT_GUEST" || user?.role === "SUBACCOUNT_USER") {
+    if (
+      userData?.role === "SUBACCOUNT_GUEST" ||
+      userData?.role === "SUBACCOUNT_USER"
+    ) {
       return redirect("/subaccount");
-    } else if (user?.role === "AGENCY_ADMIN" || user?.role === "AGENCY_OWNER") {
+    } else if (
+      userData?.role === "AGENCY_ADMIN" ||
+      userData?.role === "AGENCY_OWNER"
+    ) {
       if (searchParams.plan) {
         return redirect(
           `/agency/${agencyId}/billing?plan=${searchParams.plan}`,
@@ -32,11 +39,10 @@ export default async function page({
       return <div>Not authorized</div>;
     }
   }
-  const authUser = await currentUser();
   return (
     <div className="mt-4 flex items-center justify-center">
       <div className="max-w-[850px] rounded-xl border p-4">
-        <h1 className="text-4xl"> Create An Agency</h1>
+        <h1 className="p-3 text-4xl"> Create An Agency</h1>
         <AgencyDetails
           data={{ companyEmail: authUser?.emailAddresses[0].emailAddress }}
         />
