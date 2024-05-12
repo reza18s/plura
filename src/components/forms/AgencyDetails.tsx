@@ -2,11 +2,12 @@
 
 import { Agency } from "@prisma/client";
 import { useToast } from "../ui/use-toast";
-import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { NumberInput } from "@tremor/react";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -38,11 +39,19 @@ import { z } from "zod";
 import { AgencyFormSchema } from "./FormsSchema";
 import FileUploader from "../global/FileUploader";
 import { Switch } from "../ui/switch";
+import {
+  delAgency,
+  initUser,
+  saveActivityLogsNotification,
+  updateAgencyDetails,
+} from "@/lib/queries";
+import Loading from "../global/Loading";
+import { useRouter } from "next/navigation";
 
 export default function AgencyDetails({ data }: { data?: Partial<Agency> }) {
-  // const { toast } = useToast();
-  // const route = useRouter();
-  // const [DelAgency, setDelAgency] = useState();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [deleteAgency, setDeleteAgency] = useState(false);
   const form = useForm<z.infer<typeof AgencyFormSchema>>({
     mode: "onChange",
     resolver: zodResolver(AgencyFormSchema),
@@ -59,12 +68,63 @@ export default function AgencyDetails({ data }: { data?: Partial<Agency> }) {
       agencyLogo: data?.agencyLogo,
     },
   });
+  useEffect(() => {
+    if (data) {
+      form.reset(data);
+    }
+  }, [data]);
 
   const isLoading = form.formState.isSubmitting;
-  function onSubmit(values: z.infer<typeof AgencyFormSchema>) {
-    // eslint-disable-next-line no-console
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof AgencyFormSchema>) {
+    try {
+      let newUserData;
+      let custId;
+      if (!data?.id) {
+        const bodyData = {
+          email: values.companyEmail,
+          name: values.name,
+          shipping: {
+            address: {
+              city: values.city,
+              country: values.country,
+              line1: values.address,
+              postal_code: values.zipCode,
+              state: values.zipCode,
+            },
+            name: values.name,
+          },
+          address: {
+            city: values.city,
+            country: values.country,
+            line1: values.address,
+            postal_code: values.zipCode,
+            state: values.zipCode,
+          },
+        };
+        newUserData = await initUser({ role: "AGENCY_OWNER" });
+      }
+    } catch (error) {}
   }
+  const handleDeleteAgency = async () => {
+    if (!data?.id) return;
+    setDeleteAgency(true);
+    try {
+      await delAgency(data.id);
+      toast({
+        title: "Deleted Agency",
+        description: "Deleted your agency and all subaccounts",
+      });
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      toast({
+        variant: "destructive",
+        title: "Oppse!",
+        description: "could not delete your agency ",
+      });
+    }
+    setDeleteAgency(false);
+  };
   return (
     <AlertDialog>
       <Card>
@@ -247,7 +307,9 @@ export default function AgencyDetails({ data }: { data?: Partial<Agency> }) {
                     your goals grow too so dont forget to set the bar higher!
                   </FormDescription>
                   <NumberInput
+                    className="!border !border-input bg-background"
                     defaultValue={data?.goal}
+                    min={1}
                     onValueChange={async (val) => {
                       if (!data?.id) return;
                       await updateAgencyDetails(data.id, { goal: val });
@@ -256,17 +318,57 @@ export default function AgencyDetails({ data }: { data?: Partial<Agency> }) {
                         description: `Updated the agency goal to | ${val} Sub Account`,
                         subaccountId: undefined,
                       });
-                      router.refresh();
+                      // router.refresh();
                     }}
-                    min={1}
-                    className="!border !border-input bg-background"
                     placeholder="Sub Account Goal"
                   />
                 </div>
               )}
-              <Button type="submit">Submit</Button>
+              <Button disabled={isLoading} type="submit">
+                {isLoading ? <Loading /> : "Save Agency Information"}
+                Save agency information
+              </Button>
             </form>
           </Form>
+          {data?.id && (
+            <div className="mt-4 flex flex-row items-center justify-between gap-4 rounded-lg border border-destructive p-4">
+              <div>
+                <div>Danger Zone</div>
+              </div>
+              <div className="text-muted-foreground">
+                Deleting your agency cannpt be undone. This will also delete all
+                sub accounts and all data related to your sub accounts. Sub
+                accounts will no longer have access to funnels, contacts etc.
+              </div>
+              <AlertDialogTrigger
+                className="hove:bg-red-600 mt-2 whitespace-nowrap rounded-md p-2 text-center text-red-600 hover:text-white"
+                disabled={isLoading}
+              >
+                {deleteAgency ? "Deleting..." : "Delete Agency"}
+              </AlertDialogTrigger>
+            </div>
+          )}
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-left">
+                Are you absolutely sure?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-left">
+                This action cannot be undone. This will permanently delete the
+                Agency account and all related sub accounts.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex items-center">
+              <AlertDialogCancel className="mb-2">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive hover:bg-destructive"
+                disabled={deleteAgency}
+                onClick={handleDeleteAgency}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
         </CardContent>
       </Card>
     </AlertDialog>
