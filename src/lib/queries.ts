@@ -258,6 +258,20 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
     });
     return agencyDetails;
   } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error);
+  }
+};
+export const getNotificationAndUser = async (agencyId: string) => {
+  try {
+    const notification = await db.notification.findMany({
+      where: { id: agencyId },
+      include: { User: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return notification;
+  } catch (error) {
+    // eslint-disable-next-line no-console
     console.log(error);
   }
 };

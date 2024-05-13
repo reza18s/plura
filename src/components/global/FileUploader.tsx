@@ -17,7 +17,7 @@ const FileUpload = ({ apiEndpoint, onChange, value }: Props) => {
     return (
       <div className="flex flex-col items-center justify-center">
         {type !== "pdf" ? (
-          <div className="relative h-40 w-40">
+          <div className="relative size-40">
             <Image
               alt="uploaded image"
               className="object-contain"
@@ -53,6 +53,7 @@ const FileUpload = ({ apiEndpoint, onChange, value }: Props) => {
           onChange(res?.[0].url);
         }}
         onUploadError={(error: Error) => {
+          // eslint-disable-next-line no-console
           console.log(error);
         }}
       />

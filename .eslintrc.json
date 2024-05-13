@@ -61,6 +61,7 @@
     "no-prototype-builtins": "off",
     // REACT
     "react/jsx-uses-react": "off",
+    "react/jsx-sort-props": "off",
     "react/react-in-jsx-scope": "off",
     "jsx-a11y/href-no-hash": [0],
     "react/display-name": 0,
@@ -69,12 +70,6 @@
       "error",
       {
         "checkAliases": true
-      }
-    ],
-    "react/jsx-sort-props": [
-      "error",
-      {
-        "ignoreCase": true
       }
     ],
     // "no-undef": "off",
