@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 "use server";
 
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
@@ -6,29 +7,33 @@ import { redirect } from "next/navigation";
 import { Agency, Plan, User } from "@prisma/client";
 
 export const getAuthUserDetails = async () => {
-  const user = await currentUser();
-  if (!user) {
-    return;
-  }
-  const userData = await db.user.findUnique({
-    where: {
-      email: user.emailAddresses[0].emailAddress,
-    },
-    include: {
-      Agency: {
-        include: {
-          SidebarOption: true,
-          SubAccount: {
-            include: {
-              SidebarOption: true,
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return;
+    }
+    const userData = await db.user.findUnique({
+      where: {
+        email: user.emailAddresses[0].emailAddress,
+      },
+      include: {
+        Agency: {
+          include: {
+            SidebarOption: true,
+            SubAccount: {
+              include: {
+                SidebarOption: true,
+              },
             },
           },
         },
+        Permissions: true,
       },
-      Permissions: true,
-    },
-  });
-  return userData;
+    });
+    return userData;
+  } catch (error) {
+    console.log(error);
+  }
 };
 export const saveActivityLogsNotification = async ({
   agencyId,
@@ -39,173 +44,197 @@ export const saveActivityLogsNotification = async ({
   description: string;
   subaccountId?: string;
 }) => {
-  const authUser = await currentUser();
-  let userData;
-  if (!authUser) {
-    const response = await db.user.findFirst({
-      where: {
-        Agency: {
-          SubAccount: {
-            some: { id: subaccountId },
+  try {
+    const authUser = await currentUser();
+    let userData;
+    if (!authUser) {
+      const response = await db.user.findFirst({
+        where: {
+          Agency: {
+            SubAccount: {
+              some: { id: subaccountId },
+            },
           },
         },
-      },
-    });
-    if (response) {
-      userData = response;
+      });
+      if (response) {
+        userData = response;
+      }
+    } else {
+      userData = await db.user.findUnique({
+        where: { email: authUser?.emailAddresses[0].emailAddress },
+      });
     }
-  } else {
-    userData = await db.user.findUnique({
-      where: { email: authUser?.emailAddresses[0].emailAddress },
-    });
-  }
-  if (!userData) {
-    // eslint-disable-next-line no-console
-    console.log("Could not find a user");
-    return;
-  }
+    if (!userData) {
+      // eslint-disable-next-line no-console
+      console.log("Could not find a user");
+      return;
+    }
 
-  let foundAgencyId = agencyId;
-  if (!foundAgencyId) {
-    if (!subaccountId) {
-      throw new Error(
-        "You need to provide atleast an agency Id or subaccount Id",
-      );
+    let foundAgencyId = agencyId;
+    if (!foundAgencyId) {
+      if (!subaccountId) {
+        throw new Error(
+          "You need to provide atleast an agency Id or subaccount Id",
+        );
+      }
+      const response = await db.subAccount.findUnique({
+        where: { id: subaccountId },
+      });
+      if (response) foundAgencyId = response.agencyId;
     }
-    const response = await db.subAccount.findUnique({
-      where: { id: subaccountId },
-    });
-    if (response) foundAgencyId = response.agencyId;
-  }
-  if (subaccountId) {
-    await db.notification.create({
-      data: {
-        notification: `${userData.name} | ${description}`,
-        User: {
-          connect: {
-            id: userData.id,
+    if (subaccountId) {
+      await db.notification.create({
+        data: {
+          notification: `${userData.name} | ${description}`,
+          User: {
+            connect: {
+              id: userData.id,
+            },
+          },
+          Agency: {
+            connect: {
+              id: foundAgencyId,
+            },
+          },
+          SubAccount: {
+            connect: { id: subaccountId },
           },
         },
-        Agency: {
-          connect: {
-            id: foundAgencyId,
+      });
+    } else {
+      await db.notification.create({
+        data: {
+          notification: `${userData.name} | ${description}`,
+          User: {
+            connect: {
+              id: userData.id,
+            },
+          },
+          Agency: {
+            connect: {
+              id: foundAgencyId,
+            },
           },
         },
-        SubAccount: {
-          connect: { id: subaccountId },
-        },
-      },
-    });
-  } else {
-    await db.notification.create({
-      data: {
-        notification: `${userData.name} | ${description}`,
-        User: {
-          connect: {
-            id: userData.id,
-          },
-        },
-        Agency: {
-          connect: {
-            id: foundAgencyId,
-          },
-        },
-      },
-    });
+      });
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 
 const CreateTeamUser = async (agencyId: string, user: User) => {
-  if (user.role === "AGENCY_OWNER") return null;
-  const response = await db.user.create({ data: { ...user } });
-  return response;
+  try {
+    if (user.role === "AGENCY_OWNER") return null;
+    const response = await db.user.create({ data: { ...user } });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const verifyAndAcceptInvitation = async () => {
-  const user = await currentUser();
-  if (!user) {
-    return redirect("/sign-in");
-  }
-  const invitationExists = await db.invitation.findUnique({
-    where: {
-      email: user.emailAddresses[0].emailAddress,
-      status: "PENDING",
-    },
-  });
-  if (invitationExists) {
-    const userDetails = await CreateTeamUser(invitationExists.agencyId, {
-      id: user.id,
-      email: invitationExists.email,
-      agencyId: invitationExists.agencyId,
-      name: `${user.firstName} ${user.lastName}`,
-      role: invitationExists.role,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      avatarUrl: user.imageUrl,
-    });
-    await saveActivityLogsNotification({
-      agencyId: invitationExists?.agencyId,
-      description: "joined",
-      subaccountId: undefined,
-    });
-    if (userDetails) {
-      await clerkClient.users.updateUserMetadata(user.id, {
-        privateMetadata: {
-          role: userDetails.role || "SUBACCOUNT_USER",
-        },
-      });
-      await db.invitation.delete({
-        where: { email: userDetails.email },
-      });
-    } else return null;
-  } else {
-    const agency = await db.user.findUnique({
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return redirect("/sign-in");
+    }
+    const invitationExists = await db.invitation.findUnique({
       where: {
         email: user.emailAddresses[0].emailAddress,
+        status: "PENDING",
       },
     });
-    return agency ? agency.agencyId : null;
+    if (invitationExists) {
+      const userDetails = await CreateTeamUser(invitationExists.agencyId, {
+        id: user.id,
+        email: invitationExists.email,
+        agencyId: invitationExists.agencyId,
+        name: `${user.firstName} ${user.lastName}`,
+        role: invitationExists.role,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        avatarUrl: user.imageUrl,
+      });
+      await saveActivityLogsNotification({
+        agencyId: invitationExists?.agencyId,
+        description: "joined",
+        subaccountId: undefined,
+      });
+      if (userDetails) {
+        await clerkClient.users.updateUserMetadata(user.id, {
+          privateMetadata: {
+            role: userDetails.role || "SUBACCOUNT_USER",
+          },
+        });
+        await db.invitation.delete({
+          where: { email: userDetails.email },
+        });
+      } else return null;
+    } else {
+      const agency = await db.user.findUnique({
+        where: {
+          email: user.emailAddresses[0].emailAddress,
+        },
+      });
+      return agency ? agency.agencyId : null;
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 export const updateAgencyDetails = async (
   agencyId: string,
   agencyDetails: Partial<Agency>,
 ) => {
-  const response = await db.agency.update({
-    where: { id: agencyId },
-    data: { ...agencyDetails },
-  });
-  return response;
+  try {
+    const response = await db.agency.update({
+      where: { id: agencyId },
+      data: { ...agencyDetails },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
 };
 export const delAgency = async (agencyId: string) => {
-  const response = await db.agency.delete({ where: { id: agencyId } });
-  return response;
+  try {
+    const response = await db.agency.delete({ where: { id: agencyId } });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
 };
 export const initUser = async (newUser: Partial<User>) => {
-  const user = await currentUser();
-  if (!user) return;
+  try {
+    const user = await currentUser();
+    if (!user) return;
 
-  const userData = await db.user.upsert({
-    where: {
-      email: user.emailAddresses[0].emailAddress,
-    },
-    update: newUser,
-    create: {
-      id: user.id,
-      avatarUrl: user.imageUrl,
-      email: user.emailAddresses[0].emailAddress,
-      name: `${user.firstName} ${user.lastName}`,
-      role: newUser.role || "SUBACCOUNT_USER",
-    },
-  });
+    const userData = await db.user.upsert({
+      where: {
+        email: user.emailAddresses[0].emailAddress,
+      },
+      update: newUser,
+      create: {
+        id: user.id,
+        avatarUrl: user.imageUrl,
+        email: user.emailAddresses[0].emailAddress,
+        name: `${user.firstName} ${user.lastName}`,
+        role: newUser.role || "SUBACCOUNT_USER",
+      },
+    });
 
-  await clerkClient.users.updateUserMetadata(user.id, {
-    privateMetadata: {
-      role: newUser.role || "SUBACCOUNT_USER",
-    },
-  });
+    await clerkClient.users.updateUserMetadata(user.id, {
+      privateMetadata: {
+        role: newUser.role || "SUBACCOUNT_USER",
+      },
+    });
 
-  return userData;
+    return userData;
+  } catch (error) {
+    console.log(error);
+  }
 };
 export const upsertAgency = async (agency: Agency, price?: Plan) => {
   if (!agency.companyEmail) return null;
