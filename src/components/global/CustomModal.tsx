@@ -7,7 +7,7 @@ import {
   DialogHeader,
 } from "../ui/dialog";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import useStore from "@/storage/useStorage";
+import { useModal } from "@/Providers/ModalProvider";
 
 type Props = {
   title: string;
@@ -17,8 +17,7 @@ type Props = {
 };
 
 const CustomModal = ({ children, defaultOpen, subheading, title }: Props) => {
-  const { isOpen, setClose } = useStore((state) => state);
-  console.log(isOpen);
+  const { isOpen, setClose } = useModal();
   return (
     <Dialog open={isOpen || defaultOpen} onOpenChange={setClose}>
       <DialogContent className="h-screen overflow-scroll bg-card md:h-fit md:max-h-[700px]">

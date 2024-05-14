@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Agency,
   AgencySidebarOption,
@@ -27,53 +28,59 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
+  CommandItem,
   CommandList,
 } from "../ui/command";
-import { CommandItem } from "cmdk";
 import Link from "next/link";
-import useStore from "@/storage/useStorage";
 import CustomModal from "../global/CustomModal";
 import SubAccountDetails from "../forms/subAccountDetails";
-import { currentUser } from "@clerk/nextjs/server";
+import { useModal } from "@/Providers/ModalProvider";
+import { icons } from "@/lib/constants";
 
 type Props = {
   defaultOpen?: boolean;
-  details: any;
-  id: string;
-  sidebarLogo: string;
-  sidebarOpt: AgencySidebarOption[] | SubAccountSidebarOption[];
   subAccounts: SubAccount[];
+  sidebarOpt: AgencySidebarOption[] | SubAccountSidebarOption[];
+  sidebarLogo: string;
+  details: any;
   user: any;
+  id: string;
 };
-export default function MenuOption({
-  defaultOpen,
+
+const MenuOptions = ({
   details,
   id,
   sidebarLogo,
   sidebarOpt,
   subAccounts,
   user,
-}: Props) {
-  const [isMounted, setIsMounted] = useState<boolean>();
-  const { isOpen, setOpen } = useStore();
+  defaultOpen,
+}: Props) => {
+  const { setOpen } = useModal();
+  const [isMounted, setIsMounted] = useState(false);
+
   const openState = useMemo(
-    () => (!defaultOpen ? { open: true } : {}),
+    () => (defaultOpen ? { open: true } : {}),
     [defaultOpen],
   );
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  if (!isMounted) return;
+
   return (
-    <Sheet>
+    <Sheet modal={false} {...openState}>
       <SheetTrigger
         asChild
-        className="absolute left-4 top-4 z-[100]  md:!hidden "
+        className=" absolute left-4 top-4 z-[100] md:!hidden"
       >
         <Button variant="outline" size={"icon"}>
           <Menu />
         </Button>
       </SheetTrigger>
+
       <SheetContent
         showX={!defaultOpen}
         side={"left"}
@@ -85,7 +92,7 @@ export default function MenuOption({
           },
         )}
       >
-        <div className="">
+        <div>
           <AspectRatio ratio={16 / 5}>
             <Image
               src={sidebarLogo}
@@ -114,8 +121,8 @@ export default function MenuOption({
                 </div>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="z-[200] mt-4 size-96  sm:size-80">
-              <Command className="w-full rounded-lg">
+            <PopoverContent className="z-[200] mt-4 h-80 w-72">
+              <Command className="rounded-lg">
                 <CommandInput placeholder="Search Accounts..." />
                 <CommandList className="pb-16">
                   <CommandEmpty> No results found</CommandEmpty>
@@ -179,7 +186,7 @@ export default function MenuOption({
                               {defaultOpen ? (
                                 <Link
                                   href={`/subaccount/${subaccount.id}`}
-                                  className="flex h-full w-full gap-4"
+                                  className="flex size-full gap-4"
                                 >
                                   <div className="relative w-16">
                                     <Image
@@ -200,7 +207,7 @@ export default function MenuOption({
                                 <SheetClose asChild>
                                   <Link
                                     href={`/subaccount/${subaccount.id}`}
-                                    className="flex h-full w-full gap-4"
+                                    className="flex size-full gap-4"
                                   >
                                     <div className="relative w-16">
                                       <Image
@@ -253,8 +260,44 @@ export default function MenuOption({
               </Command>
             </PopoverContent>
           </Popover>
+          <p className="mb-2 text-xs text-muted-foreground">MENU LINKS</p>
+          <nav className="relative">
+            <Command className="overflow-visible rounded-lg bg-transparent">
+              <CommandInput placeholder="Search..." />
+              <CommandList className="overflow-visible py-4">
+                <CommandEmpty>No Results Found</CommandEmpty>
+                <CommandGroup className="overflow-visible">
+                  {sidebarOpt.map((sidebarOptions) => {
+                    let val;
+                    const result = icons.find(
+                      (icon) => icon.value === sidebarOptions.icon,
+                    );
+                    if (result) {
+                      val = <result.path />;
+                    }
+                    return (
+                      <CommandItem
+                        key={sidebarOptions.id}
+                        className="w-full md:w-[320px]"
+                      >
+                        <Link
+                          href={sidebarOptions.link}
+                          className="flex w-[320px] items-center gap-2 rounded-md transition-all hover:bg-transparent md:w-full"
+                        >
+                          {val}
+                          <span>{sidebarOptions.name}</span>
+                        </Link>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </nav>
         </div>
       </SheetContent>
     </Sheet>
   );
-}
+};
+
+export default MenuOptions;

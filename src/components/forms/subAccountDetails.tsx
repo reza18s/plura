@@ -29,7 +29,9 @@ import { Agency, SubAccount } from "@prisma/client";
 import { useToast } from "../ui/use-toast";
 import { saveActivityLogsNotification, upsertSubAccount } from "@/lib/queries";
 import React, { useEffect } from "react";
-import useStore from "@/storage/useStorage";
+import FileUpload from "../global/FileUploader";
+import Loading from "../global/Loading";
+import { useModal } from "@/Providers/ModalProvider";
 
 const formSchema = z.object({
   name: z.string(),
@@ -57,7 +59,7 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
   userName,
 }) => {
   const { toast } = useToast();
-  const { setClose } = useStore();
+  const { setClose } = useModal();
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
