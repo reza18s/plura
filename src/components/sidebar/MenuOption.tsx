@@ -93,14 +93,6 @@ const MenuOptions = ({
         )}
       >
         <div>
-          <AspectRatio ratio={16 / 5}>
-            <Image
-              src={sidebarLogo}
-              alt="Sidebar Logo"
-              fill
-              className="rounded-md object-contain"
-            />
-          </AspectRatio>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -108,7 +100,13 @@ const MenuOptions = ({
                 variant="ghost"
               >
                 <div className="flex items-center gap-2 text-left">
-                  <Compass />
+                  <Image
+                    src={sidebarLogo}
+                    alt="Sidebar Logo"
+                    height={25}
+                    width={50}
+                    className="rounded-md object-contain"
+                  />
                   <div className="flex flex-col">
                     {details.name}
                     <span className="text-muted-foreground">
@@ -121,7 +119,7 @@ const MenuOptions = ({
                 </div>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="z-[200] mt-4 h-80 w-72">
+            <PopoverContent className="z-[200] mt-4 h-96 w-[90vw] sm:w-80 md:w-72">
               <Command className="rounded-lg">
                 <CommandInput placeholder="Search Accounts..." />
                 <CommandList className="pb-16">

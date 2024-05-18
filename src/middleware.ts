@@ -1,7 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/agency"]);
+const isProtectedRoute = createRouteMatcher(["/agency(.*)", "/subaccount(.*)"]);
+
+const isPublicRoute = createRouteMatcher([
+  "/agency/sign-in",
+  "/agency/sign-up",
+]);
 
 export default clerkMiddleware((auth, req) => {
   const url = req.nextUrl;
@@ -14,6 +19,7 @@ export default clerkMiddleware((auth, req) => {
     .filter(Boolean)[0];
   if (!auth().userId && isProtectedRoute(req)) {
     // // Add custom logic to run before redirecting
+    if (isPublicRoute(req)) return;
     return auth().redirectToSignIn();
   }
   if (customSubDomain) {

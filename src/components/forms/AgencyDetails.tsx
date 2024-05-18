@@ -175,7 +175,7 @@ export default function AgencyDetails({ data }: { data?: Partial<Agency> }) {
   };
   return (
     <AlertDialog>
-      <Card>
+      <Card className="">
         <CardHeader>
           <CardTitle>Agency Information</CardTitle>
           <CardDescription>
