@@ -29,7 +29,7 @@ const SettingsPage = async ({ params }: Props) => {
   });
 
   if (!agencyDetails) return null;
-
+  console.log("lll");
   const subAccounts = agencyDetails.SubAccount;
 
   return (
