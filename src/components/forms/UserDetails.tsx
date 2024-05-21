@@ -58,7 +58,7 @@ type Props = {
   subAccounts?: SubAccount[];
   className?: string;
 };
-console.log("fucjlsak")
+console.log("fucjlsak");
 
 const UserDetails = ({ id, type, subAccounts, userData, className }: Props) => {
   const [subAccountPermissions, setSubAccountsPermissions] =

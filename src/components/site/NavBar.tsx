@@ -46,7 +46,6 @@ export default async function NavBar() {
             </Link>
           </>
         )}
-
         <UserButton></UserButton>
         <ModeToggle></ModeToggle>
       </div>
