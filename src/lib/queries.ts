@@ -4,7 +4,7 @@
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { db } from "./db";
 import { redirect } from "next/navigation";
-import { Agency, Plan, SubAccount, User } from "@prisma/client";
+import { Agency, Plan, Role, SubAccount, User } from "@prisma/client";
 import { v4 } from "uuid";
 
 export const getAuthUserDetails = async () => {
@@ -456,5 +456,66 @@ export const deleteSubAccount = async (subAccountId: string) => {
     return userData;
   } catch (error) {
     console.log(error);
+  }
+};
+export const getAgencyUsers = async (agencyId: string) => {
+  try {
+    const response = db.user.findMany({
+      where: {
+        Agency: {
+          id: agencyId,
+        },
+      },
+      include: {
+        Agency: { include: { SubAccount: true } },
+        Permissions: { include: { SubAccount: true } },
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getUser = async (userId: string) => {
+  try {
+    const response = db.user.findUnique({
+      where: { id: userId },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const deleteUser = async (userId: string) => {
+  await clerkClient.users.updateUserMetadata(userId, {
+    privateMetadata: {
+      role: undefined,
+    },
+  });
+  const deletedUser = await db.user.delete({ where: { id: userId } });
+
+  return deletedUser;
+};
+export const sendInvitation = async (
+  role: Role,
+  email: string,
+  agencyId: string,
+) => {
+  try {
+    const response = await db.invitation.create({
+      data: { email, agencyId, role },
+    });
+    await clerkClient.invitations.createInvitation({
+      emailAddress: email,
+      redirectUrl: process.env.NEXT_PUBLIC_URL,
+      publicMetadata: {
+        throughInvitation: true,
+        role,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 };

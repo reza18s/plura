@@ -6,7 +6,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { ThemeProvider } from "next-themes";
 import ModalProvider from "@/Providers/ModalProvider";
-import CustomModal from "@/components/global/CustomModal";
 
 const inter = DM_Sans({ subsets: ["latin"] });
 
