@@ -6,22 +6,12 @@ import {
   SubAccount,
   SubAccountSidebarOption,
 } from "@prisma/client";
-import { useEffect, useMemo, useState } from "react";
-
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import React, { useEffect, useMemo, useState } from "react";
+import { Sheet, SheetClose, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Button } from "../ui/button";
-import { ChevronsUpDown, Compass, Menu, PlusCircleIcon } from "lucide-react";
+import { ChevronsUpDown, Menu, PlusCircleIcon } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
-import { AspectRatio } from "../ui/aspect-ratio";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Command,
@@ -32,10 +22,10 @@ import {
   CommandList,
 } from "../ui/command";
 import Link from "next/link";
+import { icons } from "@/lib/constants";
+import { useModal } from "@/Providers/ModalProvider";
 import CustomModal from "../global/CustomModal";
 import SubAccountDetails from "../forms/subAccountDetails";
-import { useModal } from "@/Providers/ModalProvider";
-import { icons } from "@/lib/constants";
 
 type Props = {
   defaultOpen?: boolean;
@@ -259,6 +249,7 @@ const MenuOptions = ({
             </PopoverContent>
           </Popover>
           <p className="mb-2 text-xs text-muted-foreground">MENU LINKS</p>
+          {/* <Separator className="mb-4" /> */}
           <nav className="relative">
             <Command className="overflow-visible rounded-lg bg-transparent">
               <CommandInput placeholder="Search..." />

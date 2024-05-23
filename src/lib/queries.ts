@@ -6,6 +6,7 @@ import { db } from "./db";
 import { redirect } from "next/navigation";
 import { Agency, Plan, Role, SubAccount, User } from "@prisma/client";
 import { v4 } from "uuid";
+import { CreateMediaType } from "./types";
 
 export const getAuthUserDetails = async () => {
   try {
@@ -295,7 +296,7 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
 export const getNotificationAndUser = async (agencyId: string) => {
   try {
     const notification = await db.notification.findMany({
-      where: { id: agencyId },
+      where: { agencyId },
       include: { User: true },
       orderBy: { createdAt: "desc" },
     });
@@ -487,14 +488,18 @@ export const getUser = async (userId: string) => {
   }
 };
 export const deleteUser = async (userId: string) => {
-  await clerkClient.users.updateUserMetadata(userId, {
-    privateMetadata: {
-      role: undefined,
-    },
-  });
-  const deletedUser = await db.user.delete({ where: { id: userId } });
+  try {
+    await clerkClient.users.updateUserMetadata(userId, {
+      privateMetadata: {
+        role: undefined,
+      },
+    });
+    const deletedUser = await db.user.delete({ where: { id: userId } });
 
-  return deletedUser;
+    return deletedUser;
+  } catch (error) {
+    console.log(error);
+  }
 };
 export const sendInvitation = async (
   role: Role,
@@ -517,5 +522,49 @@ export const sendInvitation = async (
   } catch (error) {
     console.log(error);
     throw error;
+  }
+};
+export const getMedia = async (subaccountId: string) => {
+  try {
+    const mediaFiles = await db.subAccount.findUnique({
+      where: {
+        id: subaccountId,
+      },
+      include: { Media: true },
+    });
+    return mediaFiles;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const createMedia = async (
+  subaccountId: string,
+  mediaFile: CreateMediaType,
+) => {
+  try {
+    const response = await db.media.create({
+      data: {
+        link: mediaFile.link,
+        name: mediaFile.name,
+        subAccountId: subaccountId,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteMedia = async (mediaId: string) => {
+  try {
+    const response = await db.media.delete({
+      where: {
+        id: mediaId,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
   }
 };

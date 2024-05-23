@@ -30,6 +30,7 @@ import { Button } from "../ui/button";
 import { saveActivityLogsNotification, sendInvitation } from "@/lib/queries";
 import { useToast } from "../ui/use-toast";
 import Loading from "../global/Loading";
+import { useModal } from "@/Providers/ModalProvider";
 
 interface SendInvitationProps {
   agencyId: string;
@@ -37,6 +38,7 @@ interface SendInvitationProps {
 
 const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
   const { toast } = useToast();
+  const { setClose } = useModal();
   const userDataSchema = z.object({
     email: z.string().email(),
     role: z.enum(["AGENCY_ADMIN", "SUBACCOUNT_USER", "SUBACCOUNT_GUEST"]),
@@ -59,6 +61,7 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
         description: `Invited ${res.email}`,
         subaccountId: undefined,
       });
+      setClose()
       toast({
         title: "Success",
         description: "Created and sent invitation",

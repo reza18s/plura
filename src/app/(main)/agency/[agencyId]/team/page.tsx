@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import React from "react";
 import { Plus } from "lucide-react";
 import { currentUser } from "@clerk/nextjs/server";
-import { getAgencyUsers } from "@/lib/queries";
 import DataTable from "./DataTable";
 import { columns } from "./DataColumns";
 import SendInvitation from "@/components/forms/SendInvitation";

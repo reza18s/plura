@@ -19,6 +19,7 @@ export default async function layout({
 }) {
   try {
     const agencyId = await verifyAndAcceptInvitation();
+
     const user = await currentUser();
     if (!agencyId) return redirect("/agency");
     if (

@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { ThemeProvider } from "next-themes";
 import ModalProvider from "@/Providers/ModalProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = DM_Sans({ subsets: ["latin"] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
             enableSystem
           >
             <ModalProvider>{children}</ModalProvider>
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>
