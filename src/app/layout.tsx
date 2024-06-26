@@ -1,14 +1,12 @@
 import type { Metadata } from 'next';
-import { DM_Sans } from 'next/font/google';
 import './globals.css';
-import { ClerkProvider } from '@clerk/nextjs/server';
+import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { ThemeProvider } from '@/providers/theme-provider';
 import ModalProvider from '@/providers/modal-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnarToaster } from '@/components/ui/sonner';
-
-const font = DM_Sans({ subsets: ['latin'] });
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Plura',
@@ -22,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={font.className}>
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
