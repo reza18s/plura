@@ -1,13 +1,10 @@
 "use server";
 import Stripe from "stripe";
 import { db } from "../db";
-interface Subscription extends Stripe.Subscription {
-  plan: {
-    id: "price_1OYxkqFj9oKEERu1NbKUxXxN" | "price_1OYxkqFj9oKEERu1KfJGWxgN";
-  };
-}
+import { stripe } from ".";
+
 export const subscriptionCreated = async (
-  subscription: Subscription,
+  subscription: Stripe.Subscription,
   customerId: string,
 ) => {
   try {
@@ -28,8 +25,10 @@ export const subscriptionCreated = async (
       agencyId: agency.id,
       customerId,
       currentPeriodEndDate: new Date(subscription.current_period_end * 1000),
+      // @ts-ignore
       priceId: subscription.plan.id,
       subscritiptionId: subscription.id,
+      // @ts-ignore
       plan: subscription.plan.id,
     };
 
@@ -46,15 +45,15 @@ export const subscriptionCreated = async (
   }
 };
 
-// export const getConnectAccountProducts = async (stripeAccount: string) => {
-//   const products = await stripe.products.list(
-//     {
-//       limit: 50,
-//       expand: ["data.default_price"],
-//     },
-//     {
-//       stripeAccount,
-//     },
-//   );
-//   return products.data;
-// };
+export const getConnectAccountProducts = async (stripeAccount: string) => {
+  const products = await stripe.products.list(
+    {
+      limit: 50,
+      expand: ["data.default_price"],
+    },
+    {
+      stripeAccount,
+    },
+  );
+  return products.data;
+};

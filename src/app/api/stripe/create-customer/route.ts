@@ -1,3 +1,4 @@
+import { stripe } from "@/lib/stripe";
 import { StripeCustomerType } from "@/lib/types";
 import { NextResponse } from "next/server";
 
@@ -11,7 +12,13 @@ export async function POST(req: Request) {
     });
   }
   try {
-    return Response.json({ customerId: "1234578" });
+    const customer = await stripe.customers.create({
+      email,
+      name,
+      address,
+      shipping,
+    });
+    return Response.json({ customerId: customer.id });
   } catch (error) {
     console.log("🔴 Error", error);
     return new NextResponse("Internal Server Error", { status: 500 });
