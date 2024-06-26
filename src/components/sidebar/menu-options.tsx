@@ -9,9 +9,8 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
 import { Button } from '../ui/button';
-import { ChevronsUpDown, Compass, Menu, PlusCircleIcon } from 'lucide-react';
+import { ChevronsUpDown, Menu, PlusCircleIcon } from 'lucide-react';
 import clsx from 'clsx';
-import { AspectRatio } from '../ui/aspect-ratio';
 import Image from 'next/image';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import {
@@ -23,12 +22,10 @@ import {
   CommandList,
 } from '../ui/command';
 import Link from 'next/link';
-import { twMerge } from 'tailwind-merge';
+import { icons } from '@/lib/constants';
 import { useModal } from '@/providers/modal-provider';
 import CustomModal from '../global/custom-modal';
 import SubAccountDetails from '../forms/subaccount-details';
-import { Separator } from '../ui/separator';
-import { icons } from '@/lib/constants';
 
 type Props = {
   defaultOpen?: boolean;
@@ -67,7 +64,7 @@ const MenuOptions = ({
     <Sheet modal={false} {...openState}>
       <SheetTrigger
         asChild
-        className="felx absolute left-4 top-4 z-[100] md:!hidden"
+        className=" absolute left-4 top-4 z-[100] md:!hidden"
       >
         <Button variant="outline" size={'icon'}>
           <Menu />
@@ -78,7 +75,7 @@ const MenuOptions = ({
         showX={!defaultOpen}
         side={'left'}
         className={clsx(
-          'fixed top-0 border-r-DEFAULT bg-background/80 p-6 backdrop-blur-xl',
+          'fixed top-0 border-r bg-background/80 p-6 backdrop-blur-xl',
           {
             'z-0 hidden w-[300px] md:inline-block': defaultOpen,
             'z-[100] inline-block w-full md:hidden': !defaultOpen,
@@ -86,14 +83,6 @@ const MenuOptions = ({
         )}
       >
         <div>
-          <AspectRatio ratio={16 / 5}>
-            <Image
-              src={sidebarLogo}
-              alt="Sidebar Logo"
-              fill
-              className="rounded-md object-contain"
-            />
-          </AspectRatio>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -101,7 +90,13 @@ const MenuOptions = ({
                 variant="ghost"
               >
                 <div className="flex items-center gap-2 text-left">
-                  <Compass />
+                  <Image
+                    src={sidebarLogo}
+                    alt="Sidebar Logo"
+                    height={25}
+                    width={50}
+                    className="rounded-md object-contain"
+                  />
                   <div className="flex flex-col">
                     {details.name}
                     <span className="text-muted-foreground">
@@ -114,7 +109,7 @@ const MenuOptions = ({
                 </div>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="z-[200] mt-4 size-80">
+            <PopoverContent className="z-[200] mt-4 h-96 w-[90vw] sm:w-80 md:w-72">
               <Command className="rounded-lg">
                 <CommandInput placeholder="Search Accounts..." />
                 <CommandList className="pb-16">
@@ -123,7 +118,7 @@ const MenuOptions = ({
                     user?.role === 'AGENCY_ADMIN') &&
                     user?.Agency && (
                       <CommandGroup heading="Agency">
-                        <CommandItem className="broder-[1px] my-2 cursor-pointer rounded-md border-border !bg-transparent p-2 text-primary transition-all hover:!bg-muted">
+                        <CommandItem className="my-2 cursor-pointer rounded-md border border-border !bg-transparent p-2 text-primary transition-all hover:!bg-muted">
                           {defaultOpen ? (
                             <Link
                               href={`/agency/${user?.Agency?.id}`}
@@ -171,31 +166,12 @@ const MenuOptions = ({
                       </CommandGroup>
                     )}
                   <CommandGroup heading="Accounts">
-                    {subAccounts
-                      ? subAccounts.map((subaccount) => (
-                          <CommandItem key={subaccount.id}>
-                            {defaultOpen ? (
-                              <Link
-                                href={`/subaccount/${subaccount.id}`}
-                                className="flex size-full gap-4"
-                              >
-                                <div className="relative w-16">
-                                  <Image
-                                    src={subaccount.subAccountLogo}
-                                    alt="subaccount Logo"
-                                    fill
-                                    className="rounded-md object-contain"
-                                  />
-                                </div>
-                                <div className="flex flex-1 flex-col">
-                                  {subaccount.name}
-                                  <span className="text-muted-foreground">
-                                    {subaccount.address}
-                                  </span>
-                                </div>
-                              </Link>
-                            ) : (
-                              <SheetClose asChild>
+                    {
+                      // eslint-disable-next-line no-extra-boolean-cast
+                      !!subAccounts
+                        ? subAccounts.map((subaccount) => (
+                            <CommandItem key={subaccount.id}>
+                              {defaultOpen ? (
                                 <Link
                                   href={`/subaccount/${subaccount.id}`}
                                   className="flex size-full gap-4"
@@ -215,11 +191,33 @@ const MenuOptions = ({
                                     </span>
                                   </div>
                                 </Link>
-                              </SheetClose>
-                            )}
-                          </CommandItem>
-                        ))
-                      : 'No Accounts'}
+                              ) : (
+                                <SheetClose asChild>
+                                  <Link
+                                    href={`/subaccount/${subaccount.id}`}
+                                    className="flex size-full gap-4"
+                                  >
+                                    <div className="relative w-16">
+                                      <Image
+                                        src={subaccount.subAccountLogo}
+                                        alt="subaccount Logo"
+                                        fill
+                                        className="rounded-md object-contain"
+                                      />
+                                    </div>
+                                    <div className="flex flex-1 flex-col">
+                                      {subaccount.name}
+                                      <span className="text-muted-foreground">
+                                        {subaccount.address}
+                                      </span>
+                                    </div>
+                                  </Link>
+                                </SheetClose>
+                              )}
+                            </CommandItem>
+                          ))
+                        : 'No Accounts'
+                    }
                   </CommandGroup>
                 </CommandList>
                 {(user?.role === 'AGENCY_OWNER' ||
@@ -251,7 +249,7 @@ const MenuOptions = ({
             </PopoverContent>
           </Popover>
           <p className="mb-2 text-xs text-muted-foreground">MENU LINKS</p>
-          <Separator className="mb-4" />
+          {/* <Separator className="mb-4" /> */}
           <nav className="relative">
             <Command className="overflow-visible rounded-lg bg-transparent">
               <CommandInput placeholder="Search..." />
