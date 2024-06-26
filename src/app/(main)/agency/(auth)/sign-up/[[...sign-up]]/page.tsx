@@ -1,5 +1,8 @@
-import { SignUp } from "@clerk/nextjs";
+import { SignUp } from '@clerk/nextjs/server';
+import React from 'react';
 
-export default function Page() {
-  return <SignUp path="/agency/sign-up" />;
-}
+const Page = () => {
+  return <SignUp />;
+};
+
+export default Page;

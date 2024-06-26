@@ -1,10 +1,10 @@
-import { db } from "@/lib/db";
-import React from "react";
-import { Plus } from "lucide-react";
-import { currentUser } from "@clerk/nextjs/server";
-import DataTable from "./DataTable";
-import { columns } from "./DataColumns";
-import SendInvitation from "@/components/forms/SendInvitation";
+import { db } from '@/lib/db';
+import React from 'react';
+import DataTable from './data-table';
+import { Plus } from 'lucide-react';
+import { currentUser } from '@clerk/nextjs/server';
+import { columns } from './columns';
+import SendInvitation from '@/components/forms/send-invitation';
 
 type Props = {
   params: { agencyId: string };

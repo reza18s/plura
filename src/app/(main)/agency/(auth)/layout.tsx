@@ -1,8 +1,9 @@
-import React from "react";
-export default function layout({ children }: { children: React.ReactNode }) {
+import React from 'react'
+
+const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      {children}
-    </div>
-  );
+    <div className="h-full flex items-center justify-center">{children}</div>
+  )
 }
+
+export default AuthLayout

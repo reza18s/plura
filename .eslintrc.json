@@ -36,14 +36,14 @@
     "no-lonely-if": "error",
     "no-unneeded-ternary": "error",
     "one-var-declaration-per-line": "error",
-    "quotes": [
-      "error",
-      "double",
-      {
-        "allowTemplateLiterals": false,
-        "avoidEscape": true
-      }
-    ],
+    // "quotes": [
+    //   "error",
+    //   "signal",
+    //   {
+    //     "allowTemplateLiterals": false,
+    //     "avoidEscape": true
+    //   }
+    // ],
     // ES6
     "array-callback-return": "off",
     "prefer-const": "error",

@@ -11,11 +11,6 @@ body {
 *::before,
 *::after {
   box-sizing: border-box;
-  /* background-color: rgb(226, 226, 226); */
-}
-::-webkit-scrollbar {
-  height: 0px;
-  width: 0px;
 }
 
 /* 

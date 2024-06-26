@@ -1,10 +1,17 @@
-import NavBar from "@/components/site/NavBar";
-import React from "react";
-export default function layout({ children }: { children: React.ReactNode }) {
+import Navigation from '@/components/site/navigation';
+import { ClerkProvider } from '@clerk/nextjs/server';
+import { dark } from '@clerk/themes';
+import React from 'react';
+
+const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen flex-col">
-      <NavBar></NavBar>
-      {children}
-    </div>
+    <ClerkProvider appearance={{ baseTheme: dark }}>
+      <main className="h-full">
+        <Navigation />
+        {children}
+      </main>
+    </ClerkProvider>
   );
-}
+};
+
+export default layout;
